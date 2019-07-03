@@ -1,5 +1,8 @@
 package com.example.mymusic;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -207,6 +210,7 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
 public class PlayerInService extends Service implements OnClickListener, MediaPlayer.OnCompletionListener, SeekBar.OnSeekBarChangeListener {
 
 
+    private static final String TAG = "MusicDebug";
     private static WeakReference<ImageButton> btnPlay;
     private static WeakReference<ImageButton> btnForward;
     private static WeakReference<ImageButton> btnBackward;
@@ -236,34 +240,48 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
 
     @Override
     public void onCreate() {
-
+        super.onCreate();
         mp = new MediaPlayer();
         mp.reset();
         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        super.onCreate();
+        Log.d(TAG, "Service onCreate: " + this.hashCode());
 
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public int onStartCommand(Intent intent, int flags, int starId) {
+        super.onStart(intent, starId);
+        initUI();
+        Log.d(TAG, "Service onStartCommand: " + this.hashCode());
         initUI();
         songsList = (ArrayList<HashMap<String, String>>) intent.getSerializableExtra("musiclist");
         isFirst = intent.getBooleanExtra("isFirst", false);
-
-
         if (isFirst == true) {
             currentSongIndex = intent.getIntExtra("songIndex", 0);
             playSong(currentSongIndex);
         }
-        if(mp.isPlaying()&&isFirst == false)
-        {
+        if (mp.isPlaying() && isFirst == false) {
             btnPlay.get().setImageResource(R.drawable.pause96);
             songTitleLabel.get().setText(songsList.get(currentSongIndex).get("songTitle"));
         }
-        //Utilities.initNotification(songsList.get(currentSongIndex).get("songTitle"),this);
-//        isFirst=true;
-        super.onStart(intent, starId);
+
+        Log.d(TAG, "Service title: " + songsList.get(currentSongIndex).get("songTitle"));
+//        NotificationManager notificationManager = (NotificationManager) getSystemService(
+//                Context.NOTIFICATION_SERVICE);// Tạo đối tượng Notification
+//        Intent intent1 = new Intent(this, MainActivity.class);
+//        PendingIntent pIntent = PendingIntent
+//                .getActivity(this, (int) System.currentTimeMillis(), intent1, 0);
+//        Notification noti = new Notification.Builder(this)
+//                .setContentTitle("New mail from " + "test@gmail.com")
+//                .setContentText("Subject")
+//                .setSmallIcon(R.drawable.tam9)
+//                .setContentIntent(pIntent)
+//                .setAutoCancel(true)
+//                .addAction(R.drawable.play961, "Call", pIntent).build();
+//        notificationManager.notify(0, noti);
+//        startForeground(0,noti);
+
         return START_STICKY;
     }
 
@@ -384,22 +402,40 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
 
                 break;
             case R.id.btnPlay:
-                if (mp.isPlaying() && isFirst) {
-                    mp.pause();
-                    btnPlay.get().setImageResource(R.drawable.play961);
-                } else if (mp.isPlaying() == false && isFirst) {
-                    mp.start();
-                    btnPlay.get().setImageResource(R.drawable.pause96);
-                } else if (isFirst == false&&mp.isPlaying()) {
-                    mp.pause();
-                    btnPlay.get().setImageResource(R.drawable.play961);
-                    isFirst=true;
+//                if (mp.isPlaying() && isFirst) {
+//                    mp.pause();
+//                    btnPlay.get().setImageResource(R.drawable.play961);
+//                } else if (mp.isPlaying() == false && isFirst) {
+//                    mp.start();
+//                    btnPlay.get().setImageResource(R.drawable.pause96);
+//                } else if (isFirst == false&&mp.isPlaying()) {
+//                    mp.pause();
+//                    btnPlay.get().setImageResource(R.drawable.play961);
+//                    //isFirst=true;
+//                } else {
+//                    //songTitleLabel.get().setText(songsList.get(currentSongIndex).get("songTitle"));
+//                    playSong(0);
+//                    btnPlay.get().setImageResource(R.drawable.pause96);
+//                    isFirst=true;
+//                }
+                if (isFirst) {
+                    if (mp.isPlaying() && isFirst) {
+                        mp.pause();
+                        btnPlay.get().setImageResource(R.drawable.play961);
+                    } else if (mp.isPlaying() == false && isFirst) {
+                        mp.start();
+                        btnPlay.get().setImageResource(R.drawable.pause96);
+                    }
                 } else {
-                    //songTitleLabel.get().setText(songsList.get(currentSongIndex).get("songTitle"));
-                    playSong(0);
-                    btnPlay.get().setImageResource(R.drawable.pause96);
-                    isFirst=true;
-
+                    if (!mp.isPlaying()) {
+                        playSong(0);
+                        isFirst = true;
+                    }
+                    else {
+                        mp.pause();
+                        btnPlay.get().setImageResource(R.drawable.play961);
+                        isFirst = true;
+                    }
                 }
 
                 break;
@@ -414,6 +450,7 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
     public void playSong(int songIndex) {
         // Play song
         try {
+
             mp.reset();
             mp.setDataSource(songsList.get(songIndex).get("songPath"));
             mp.prepare();

@@ -2,6 +2,7 @@ package com.example.mymusic;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -35,6 +36,7 @@ import java.util.Random;
 
 
 public class MainActivity extends AppCompatActivity  {
+    private static final String TAG = "MusicDebug";
 
 
  /*   public static ImageButton btnPlay,btnStop;
@@ -156,7 +158,7 @@ public class MainActivity extends AppCompatActivity  {
     public static ImageButton btnVolume;
     public static ImageButton btnVolumeMax;
     AudioManager audioManager;
-    private static boolean isFirst = false;
+    private boolean isFirst = false;
     // Media Player
     //private static MediaPlayer mp;
     // Handler to update UI timer, progress bar etc,.
@@ -174,12 +176,14 @@ public class MainActivity extends AppCompatActivity  {
     Context context;
     private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
     public Intent intentSer= new Intent();
+
     //ArrayList<HashMap<String, String>> songsListData ;
     public Intent intent= new Intent();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "Activity onCreate: " + this.hashCode());
         setContentView(R.layout.activity_detail_2);
         // All player buttons
         btnVolume = (ImageButton) findViewById(R.id.btnVolume);
@@ -199,19 +203,6 @@ public class MainActivity extends AppCompatActivity  {
         songTotalDurationLabel = (TextView) findViewById(R.id.songTotalDurationLabel);
 
 
-        NotificationManager notificationManager = (NotificationManager) getSystemService(
-                Context.NOTIFICATION_SERVICE);// Tạo đối tượng Notification
-        Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pIntent = PendingIntent
-                .getActivity(this, (int) System.currentTimeMillis(), intent, 0);
-        Notification noti = new Notification.Builder(this)
-                .setContentTitle("New mail from " + "test@gmail.com")
-                .setContentText("Subject")
-                .setSmallIcon(R.drawable.tam9)
-                .setContentIntent(pIntent)
-                .setAutoCancel(true)
-                .addAction(R.drawable.play961, "Call", pIntent).build();
-        notificationManager.notify(0, noti);
 
 
 
@@ -223,7 +214,7 @@ public class MainActivity extends AppCompatActivity  {
         // Listeners
 //        songProgressBar.setOnSeekBarChangeListener(this); // Important
 //        mp.setOnCompletionListener(this); // Important
-        isFirst=intent.getBooleanExtra("isFirst",false);
+//        isFirst=intent.getBooleanExtra("isFirst",false);
 
         AndroidRuntimePermission();
         GetAllMediaMp3Files();
@@ -473,12 +464,14 @@ public class MainActivity extends AppCompatActivity  {
     {
         super.onStart();
         intentSer = new Intent(this, PlayerInService.class);
+        //isFirst=intent.getBooleanExtra("isFirst",false);
         intentSer.putExtra("musiclist", songsList);
         //intentSer.putExtra("songIndex", currentSongIndex);
         //intentSer.putExtra("isFirst", isFirst);
         if(isFirst==false) {
-            startService(intentSer);
-        }
+        startService(intentSer);
+    }
+
 
     }
     public void GetAllMediaMp3Files() {
@@ -752,7 +745,7 @@ public class MainActivity extends AppCompatActivity  {
     }
     @Override
     protected void onDestroy()
-    {
+    {super.onDestroy();
         if(!PlayerInService.mp.isPlaying())
         {
             PlayerInService.mp.stop();
@@ -760,11 +753,11 @@ public class MainActivity extends AppCompatActivity  {
         }else {
             btnPlay.setBackgroundResource(R.drawable.pause96);
         }
-        super.onDestroy();
+
     }
     @Override
     protected void onResume()
-    {
+    {super.onResume();
         try{
             if(!PlayerInService.mp.isPlaying())
             {
@@ -777,7 +770,9 @@ public class MainActivity extends AppCompatActivity  {
         {
             Log.e("Exception",""+e.getMessage()+e.getStackTrace()+e.getCause());
         }
-        super.onResume();
+
+
+        Log.d(TAG, "Activity onResume: " + this.hashCode());
     }
 
 
