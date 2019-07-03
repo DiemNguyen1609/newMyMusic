@@ -231,7 +231,7 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
 
     private static ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
 
-    private boolean isFirst = false;
+    private static boolean isFirst = false;
 
 
     @Override
@@ -248,12 +248,20 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
     @Override
     public int onStartCommand(Intent intent, int flags, int starId) {
         initUI();
-        songsList=(ArrayList<HashMap<String, String>>)intent.getSerializableExtra("musiclist");
-        currentSongIndex = intent.getIntExtra("songIndex",0);
-        isFirst=intent.getBooleanExtra("isFirst",false);
-        if(isFirst==true) {
+        songsList = (ArrayList<HashMap<String, String>>) intent.getSerializableExtra("musiclist");
+        isFirst = intent.getBooleanExtra("isFirst", false);
+
+
+        if (isFirst == true) {
+            currentSongIndex = intent.getIntExtra("songIndex", 0);
             playSong(currentSongIndex);
         }
+        if(mp.isPlaying()&&isFirst == false)
+        {
+            btnPlay.get().setImageResource(R.drawable.pause96);
+            songTitleLabel.get().setText(songsList.get(currentSongIndex).get("songTitle"));
+        }
+        //Utilities.initNotification(songsList.get(currentSongIndex).get("songTitle"),this);
 //        isFirst=true;
         super.onStart(intent, starId);
         return START_STICKY;
@@ -293,107 +301,107 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
         switch (v.getId()) {
             case R.id.btnForward:
 
-                    int currentPosition = mp.getCurrentPosition();
-                    // check if seekForward time is lesser than song duration
-                    if (currentPosition + seekForwardTime <= mp.getDuration()) {
-                        // forward song
-                        mp.seekTo(currentPosition + seekForwardTime);
-                    } else {
-                        // forward to end position
-                        mp.seekTo(mp.getDuration());
-                    }
+                int currentPosition = mp.getCurrentPosition();
+                // check if seekForward time is lesser than song duration
+                if (currentPosition + seekForwardTime <= mp.getDuration()) {
+                    // forward song
+                    mp.seekTo(currentPosition + seekForwardTime);
+                } else {
+                    // forward to end position
+                    mp.seekTo(mp.getDuration());
+                }
 
                 break;
             case R.id.btnBackward:
 
-                    int currentPosition1 = mp.getCurrentPosition();
-                    // check if seekBackward time is greater than 0 sec
-                    if (currentPosition1 - seekBackwardTime >= 0) {
-                        // forward song
-                        mp.seekTo(currentPosition1 - seekBackwardTime);
-                    } else {
-                        // backward to starting position
-                        mp.seekTo(0);
-                    }
+                int currentPosition1 = mp.getCurrentPosition();
+                // check if seekBackward time is greater than 0 sec
+                if (currentPosition1 - seekBackwardTime >= 0) {
+                    // forward song
+                    mp.seekTo(currentPosition1 - seekBackwardTime);
+                } else {
+                    // backward to starting position
+                    mp.seekTo(0);
+                }
 
                 break;
             case R.id.btnNext:
 
-                    if (currentSongIndex < (songsList.size() - 1)) {
-                        playSong(currentSongIndex + 1);
-                        currentSongIndex = currentSongIndex + 1;
-                    } else {
-                        // play first song
-                        playSong(0);
-                        currentSongIndex = 0;
-                    }
+                if (currentSongIndex < (songsList.size() - 1)) {
+                    playSong(currentSongIndex + 1);
+                    currentSongIndex = currentSongIndex + 1;
+                } else {
+                    // play first song
+                    playSong(0);
+                    currentSongIndex = 0;
+                }
 
                 break;
             case R.id.btnPrevious:
 
-                    if (currentSongIndex > 0) {
-                        playSong(currentSongIndex - 1);
-                        currentSongIndex = currentSongIndex - 1;
-                    } else {
-                        // play last song
-                        playSong(songsList.size() - 1);
-                        currentSongIndex = songsList.size() - 1;
-                    }
+                if (currentSongIndex > 0) {
+                    playSong(currentSongIndex - 1);
+                    currentSongIndex = currentSongIndex - 1;
+                } else {
+                    // play last song
+                    playSong(songsList.size() - 1);
+                    currentSongIndex = songsList.size() - 1;
+                }
 
                 break;
             case R.id.btnRepeat:
 
-                    if (isRepeat) {
-                        isRepeat = false;
-                        Toast.makeText(getApplicationContext(), "Repeat is OFF", Toast.LENGTH_SHORT).show();
-                        btnRepeat.get().setImageResource(R.drawable.btn_repeat);
-                    } else {
-                        // make repeat to true
-                        isRepeat = true;
-                        Toast.makeText(getApplicationContext(), "Repeat is ON", Toast.LENGTH_SHORT).show();
-                        // make shuffle to false
-                        isShuffle = false;
-                        btnRepeat.get().setImageResource(R.drawable.btn_repeat_focused);
-                        btnShuffle.get().setImageResource(R.drawable.btn_shuffle);
-                    }
+                if (isRepeat) {
+                    isRepeat = false;
+                    Toast.makeText(getApplicationContext(), "Repeat is OFF", Toast.LENGTH_SHORT).show();
+                    btnRepeat.get().setImageResource(R.drawable.btn_repeat);
+                } else {
+                    // make repeat to true
+                    isRepeat = true;
+                    Toast.makeText(getApplicationContext(), "Repeat is ON", Toast.LENGTH_SHORT).show();
+                    // make shuffle to false
+                    isShuffle = false;
+                    btnRepeat.get().setImageResource(R.drawable.btn_repeat_focused);
+                    btnShuffle.get().setImageResource(R.drawable.btn_shuffle);
+                }
 
                 break;
             case R.id.btnShuffle:
 
-                    if (isShuffle) {
-                        isShuffle = false;
-                        Toast.makeText(getApplicationContext(), "Shuffle is OFF", Toast.LENGTH_SHORT).show();
-                        btnShuffle.get().setImageResource(R.drawable.btn_shuffle);
-                    } else {
-                        // make repeat to true
-                        isShuffle = true;
-                        Toast.makeText(getApplicationContext(), "Shuffle is ON", Toast.LENGTH_SHORT).show();
-                        // make shuffle to false
-                        isRepeat = false;
-                        btnShuffle.get().setImageResource(R.drawable.btn_shuffle_focused);
-                        btnRepeat.get().setImageResource(R.drawable.btn_repeat);
-                    }
+                if (isShuffle) {
+                    isShuffle = false;
+                    Toast.makeText(getApplicationContext(), "Shuffle is OFF", Toast.LENGTH_SHORT).show();
+                    btnShuffle.get().setImageResource(R.drawable.btn_shuffle);
+                } else {
+                    // make repeat to true
+                    isShuffle = true;
+                    Toast.makeText(getApplicationContext(), "Shuffle is ON", Toast.LENGTH_SHORT).show();
+                    // make shuffle to false
+                    isRepeat = false;
+                    btnShuffle.get().setImageResource(R.drawable.btn_shuffle_focused);
+                    btnRepeat.get().setImageResource(R.drawable.btn_repeat);
+                }
 
                 break;
             case R.id.btnPlay:
-                if (mp.isPlaying()&&isFirst)
-                {
+                if (mp.isPlaying() && isFirst) {
                     mp.pause();
                     btnPlay.get().setImageResource(R.drawable.play961);
-                }
-                else
-                if (mp.isPlaying()==false&&isFirst)
-                {
+                } else if (mp.isPlaying() == false && isFirst) {
                     mp.start();
                     btnPlay.get().setImageResource(R.drawable.pause96);
+                } else if (isFirst == false&&mp.isPlaying()) {
+                    mp.pause();
+                    btnPlay.get().setImageResource(R.drawable.play961);
+                    isFirst=true;
+                } else {
+                    //songTitleLabel.get().setText(songsList.get(currentSongIndex).get("songTitle"));
+                    playSong(0);
+                    btnPlay.get().setImageResource(R.drawable.pause96);
+                    isFirst=true;
+
                 }
 
-                if (isFirst==false&&mp.isPlaying()==false)
-                {
-                    playSong(0);
-                    //btnPlay.get().setImageResource(R.drawable.pause96);
-                    isFirst = true;
-                }
                 break;
         }
     }
@@ -403,7 +411,7 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
      *
      * @param songIndex - index of song
      */
-    public static void playSong(int songIndex) {
+    public void playSong(int songIndex) {
         // Play song
         try {
             mp.reset();
@@ -423,6 +431,12 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
 
             // Updating progress bar
             updateProgressBar();
+//            isFirst=true;
+//             Intent intentSer = new Intent();
+//            intentSer.putExtra("isFirst",isFirst);
+//            sendBroadcast(intentSer);
+
+
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         } catch (IllegalStateException e) {
@@ -524,6 +538,7 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
             }
         }
     }
+
     @Override
     public void onDestroy() {
     }

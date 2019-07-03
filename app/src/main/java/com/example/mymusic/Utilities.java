@@ -1,6 +1,49 @@
 package com.example.mymusic;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+
 public class Utilities {
+
+
+    public static NotificationManager mNotificationManager;
+    @SuppressWarnings("unused")
+    public static void initNotification(String songTitle, Context context)
+    {
+        try {
+            //mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+//            String ns=Context.NOTIFICATION_SERVICE;
+//            mNotificationManager=(NotificationManager)Context.getSystemService(ns);
+            int icon = R.drawable.tam9;
+            CharSequence tickerText="Playing your song";
+            long when=System.currentTimeMillis();
+
+            //notification.flags=Notification.FLAG_ONGOING_EVENT;
+            //Context context =mContext.getApplicationContext();
+            CharSequence songName=""+ songTitle;
+            Intent notificationIntent = new Intent(context,DetailActivity.class);
+            PendingIntent contentIntent = PendingIntent.getActivity(context, 0,notificationIntent,0);
+
+            Notification.Builder builder = new Notification.Builder(context);
+            builder.setTicker(tickerText);
+            builder.setContentTitle(songName);
+            builder.setSmallIcon(icon);
+            builder.setContentIntent(contentIntent);
+            builder.setOngoing(true);
+            builder.setWhen(when);
+            //notification.setLatestEventInfo(context,songName,null,contentIntent);
+            //notification=builder.getNotification();
+            mNotificationManager.notify(0,builder.build());
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 	 /**
      * Function to convert milliseconds time to

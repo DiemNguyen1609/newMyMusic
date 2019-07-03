@@ -2,6 +2,9 @@ package com.example.mymusic;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,7 +33,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import static com.example.mymusic.PlayerInService.playSong;
 
 public class MainActivity extends AppCompatActivity  {
 
@@ -154,7 +156,7 @@ public class MainActivity extends AppCompatActivity  {
     public static ImageButton btnVolume;
     public static ImageButton btnVolumeMax;
     AudioManager audioManager;
-    private boolean isFirst = false;
+    private static boolean isFirst = false;
     // Media Player
     //private static MediaPlayer mp;
     // Handler to update UI timer, progress bar etc,.
@@ -173,7 +175,7 @@ public class MainActivity extends AppCompatActivity  {
     private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
     public Intent intentSer= new Intent();
     //ArrayList<HashMap<String, String>> songsListData ;
-
+    public Intent intent= new Intent();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -196,6 +198,23 @@ public class MainActivity extends AppCompatActivity  {
         songCurrentDurationLabel = (TextView) findViewById(R.id.songCurrentDurationLabel);
         songTotalDurationLabel = (TextView) findViewById(R.id.songTotalDurationLabel);
 
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(
+                Context.NOTIFICATION_SERVICE);// Tạo đối tượng Notification
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pIntent = PendingIntent
+                .getActivity(this, (int) System.currentTimeMillis(), intent, 0);
+        Notification noti = new Notification.Builder(this)
+                .setContentTitle("New mail from " + "test@gmail.com")
+                .setContentText("Subject")
+                .setSmallIcon(R.drawable.tam9)
+                .setContentIntent(pIntent)
+                .setAutoCancel(true)
+                .addAction(R.drawable.play961, "Call", pIntent).build();
+        notificationManager.notify(0, noti);
+
+
+
         // Mediaplayer
         //mp = new MediaPlayer();
         //utils = new Utilities();
@@ -204,13 +223,24 @@ public class MainActivity extends AppCompatActivity  {
         // Listeners
 //        songProgressBar.setOnSeekBarChangeListener(this); // Important
 //        mp.setOnCompletionListener(this); // Important
+        isFirst=intent.getBooleanExtra("isFirst",false);
 
         AndroidRuntimePermission();
         GetAllMediaMp3Files();
-        intentSer = new Intent(this, PlayerInService.class);
-        intentSer.putExtra("musiclist", songsList);
-        //intentSer.putExtra("isFirst", false);
-        startService(intentSer);
+//        intentSer = new Intent(this, PlayerInService.class);
+//        intentSer.putExtra("musiclist", songsList);
+//        //intentSer.putExtra("songIndex", currentSongIndex);
+//        //intentSer.putExtra("isFirst", isFirst);
+//        if(isFirst==false) {
+//            startService(intentSer);
+//        }
+
+//        else
+//        {
+//            intentSer.putExtra("songIndex", currentSongIndex);
+//            startService(intentSer);
+//        }
+
         //ContextCompat.startForegroundService(this,new Intent(this, PlayerInService.class));
 
 
@@ -438,6 +468,19 @@ public class MainActivity extends AppCompatActivity  {
 
     }
 
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        intentSer = new Intent(this, PlayerInService.class);
+        intentSer.putExtra("musiclist", songsList);
+        //intentSer.putExtra("songIndex", currentSongIndex);
+        //intentSer.putExtra("isFirst", isFirst);
+        if(isFirst==false) {
+            startService(intentSer);
+        }
+
+    }
     public void GetAllMediaMp3Files() {
 
         contentResolver = context.getContentResolver();
@@ -699,7 +742,8 @@ public class MainActivity extends AppCompatActivity  {
             intentSer = new Intent(getApplicationContext(), PlayerInService.class);
             intentSer.putExtra("musiclist", songsList);
             intentSer.putExtra("songIndex", currentSongIndex);
-            intentSer.putExtra("isFirst", true);
+            isFirst=true;
+            intentSer.putExtra("isFirst", isFirst);
             startService(intentSer);
             // play selected song
             //playSong(currentSongIndex);
