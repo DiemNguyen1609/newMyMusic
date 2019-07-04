@@ -1,17 +1,10 @@
 package com.example.mymusic;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+
 import android.app.Service;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-//import android.media.MediaPlayer.OnPreparedListener;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
@@ -22,195 +15,14 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import static android.content.Intent.getIntent;
-
-/*
-public class PlayerInService extends Service implements OnClickListener, MediaPlayer.OnCompletionListener, SeekBar.OnSeekBarChangeListener {
-    private WeakReference<ImageButton> btnPlay;
-    private WeakReference<ImageButton> btnStop;
-    public static WeakReference<TextView> textViewSongTime;
-    public static WeakReference<SeekBar> songProgressBar;
-    static Handler progressBarHandler = new Handler();
-
-    public static MediaPlayer mp;
-    private boolean isPause=false;
-
-    @Override
-    public  void onCreate(){
-
-        mp=new MediaPlayer() ;
-        mp.reset();
-        mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        super.onCreate();
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public  int onStartCommand(Intent intent,int flags,int starId)
-    {
-        initUI();
-        super.onStart(intent,starId);
-        return START_STICKY;
-    }
-
-    @Override
-    public IBinder onBind(Intent intent)
-    {
-
-        return null;
-    }
-
-    private void initUI()
-    {
-        btnPlay= new WeakReference<>(DetailActivity.btnPlay);
-        btnStop= new WeakReference<>(DetailActivity.btnStop);
-        textViewSongTime = new WeakReference<>(DetailActivity.textViewSongTime);
-        songProgressBar= new WeakReference<>(DetailActivity.seekBar);
-        songProgressBar.get().setOnSeekBarChangeListener(this);
-        btnPlay.get().setOnClickListener(this);
-        btnStop.get().setOnClickListener(this);
-        mp.setOnCompletionListener(this);
-    }
-
-
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId())
-        {
-            case R.id.btnPlay:
-                if(mp.isPlaying())
-                {
-                    Utility.initNotification("Playing music",this);
-                    mp.pause();
-                    isPause=true;
-                    progressBarHandler.removeCallbacks(mUpdateTimeTask);
-                    btnPlay.get().setBackgroundResource(R.drawable.play);
-                    return;
-                }
-                if(isPause)
-                {
-                    mp.start();
-                    isPause=false;
-                    updateProgressBar();
-                    btnPlay.get().setBackgroundResource(R.drawable.pause);
-                }
-                if(!mp.isPlaying())
-                {
-                    playSong();
-                }
-                break;
-            case R.id.btnStop:
-                mp.stop();
-                onCompletion(mp);
-                textViewSongTime.get().setText("0.00/0.00");
-                break;
-        }
-
-    }
-    public void updateProgressBar()
-    {
-        try{
-            progressBarHandler.postDelayed(mUpdateTimeTask,100);
-        }catch (Exception e)
-        {
-
-        }
-    }
-    static Runnable mUpdateTimeTask= new Runnable() {
-        public void run() {
-            long totalDuration =0;
-            long currentDuration=0;
-            try{
-                totalDuration =mp.getDuration();
-                currentDuration=mp.getCurrentPosition();
-                textViewSongTime.get().setText(Utility.milliSecondsToTimer(currentDuration)+"/"+Utility.milliSecondsToTimer(totalDuration));
-                int progress =(int)(Utility.getProgressPercentage(currentDuration,totalDuration));
-                songProgressBar.get().setProgress(progress);
-                progressBarHandler.postDelayed(this,100);
-            }catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    @Override
-    public void onDestroy() {
-    }
-
-    public void playSong()
-    {
-
-        try{
-
-            mp.reset();
-            Uri myUri=Uri.parse("android.resource://"+this.getPackageName()+"/"+R.raw.anhchuatungbiet);
-            mp.setDataSource(this,myUri);
-            mp.prepareAsync();
-            mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    try{
-                        mp.start();
-                        updateProgressBar();
-                        btnPlay.get().setBackgroundResource(R.drawable.pause);
-                        //btnPlay.setImageDrawable(getResources().getDrawable(R.drawable.pause));
-
-                    }catch (Exception e)
-                    {
-                        Log.i("EXCEPTION",""+e.getMessage());
-                    }
-                }
-            });
-
-        }catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onCompletion(MediaPlayer mp) {
-        songProgressBar.get().setProgress(0);
-        progressBarHandler.removeCallbacks(mUpdateTimeTask);
-        btnPlay.get().setBackgroundResource(R.drawable.play);
-    }
-
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-    }
-
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-        progressBarHandler.removeCallbacks(mUpdateTimeTask);
-
-    }
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-        progressBarHandler.removeCallbacks(mUpdateTimeTask);
-        int totalDuration=mp.getDuration();
-        int currentPosition=Utility.progressToTimer(seekBar.getProgress(),totalDuration);
-        mp.seekTo(currentPosition);
-        updateProgressBar();
-
-    }
-
-}
-*/
 public class PlayerInService extends Service implements OnClickListener, MediaPlayer.OnCompletionListener, SeekBar.OnSeekBarChangeListener {
 
-
-    private static final String TAG = "MusicDebug";
     private static WeakReference<ImageButton> btnPlay;
     private static WeakReference<ImageButton> btnForward;
     private static WeakReference<ImageButton> btnBackward;
@@ -244,52 +56,30 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
         mp = new MediaPlayer();
         mp.reset();
         mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        Log.d(TAG, "Service onCreate: " + this.hashCode());
 
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public int onStartCommand(Intent intent, int flags, int starId) {
-        //super.onStart(intent, starId);
+        super.onStart(intent, starId);
         super.onStartCommand(intent, flags, starId);
-        initUI();
-        Log.d(TAG, "Service onStartCommand: " + this.hashCode());
         initUI();
         songsList = (ArrayList<HashMap<String, String>>) intent.getSerializableExtra("musiclist");
         isFirst = intent.getBooleanExtra("isFirst", false);
-
-        if (isFirst==true){
+        int head = intent.getIntExtra("head", 0);
+        if (head == 1) {
+            btnPlay.get().setImageResource(R.drawable.play961);
+        } else if (isFirst == true) {
             currentSongIndex = intent.getIntExtra("songIndex", 0);
             playSong(currentSongIndex);
         }
-             if(mp.isPlaying()&&isFirst==false) {
-                btnPlay.get().setImageResource(R.drawable.pause96);
-                songTitleLabel.get().setText(songsList.get(currentSongIndex).get("songTitle"));
-            }
-
-               else if(!mp.isPlaying()&&isFirst==false) {
-                 btnPlay.get().setImageResource(R.drawable.play961);
-             }
-
-
-
-
-        Log.d(TAG, "Service title: " + songsList.get(currentSongIndex).get("songTitle"));
-//        NotificationManager notificationManager = (NotificationManager) getSystemService(
-//                Context.NOTIFICATION_SERVICE);// Tạo đối tượng Notification
-//        Intent intent1 = new Intent(this, MainActivity.class);
-//        PendingIntent pIntent = PendingIntent
-//                .getActivity(this, (int) System.currentTimeMillis(), intent1, 0);
-//        Notification noti = new Notification.Builder(this)
-//                .setContentTitle("New mail from " + "test@gmail.com")
-//                .setContentText("Subject")
-//                .setSmallIcon(R.drawable.tam9)
-//                .setContentIntent(pIntent)
-//                .setAutoCancel(true)
-//                .addAction(R.drawable.play961, "Call", pIntent).build();
-//        notificationManager.notify(0, noti);
-//        startForeground(0,noti);
+        if (mp.isPlaying() && isFirst == false) {
+            btnPlay.get().setImageResource(R.drawable.pause96);
+            songTitleLabel.get().setText(songsList.get(currentSongIndex).get("songTitle"));
+        } else if (!mp.isPlaying() && isFirst == false) {
+            btnPlay.get().setImageResource(R.drawable.play961);
+        }
 
         return START_STICKY;
     }
@@ -299,6 +89,7 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
         return null;
     }
 
+    // reference to id of buttons
     private void initUI() {
         btnPlay = new WeakReference<>(MainActivity.btnPlay);
         btnForward = new WeakReference<>(MainActivity.btnForward);
@@ -326,8 +117,11 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            /**
+             * Forward button click event
+             * Forwards song specified seconds
+             * */
             case R.id.btnForward:
-
                 int currentPosition = mp.getCurrentPosition();
                 // check if seekForward time is lesser than song duration
                 if (currentPosition + seekForwardTime <= mp.getDuration()) {
@@ -339,6 +133,10 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
                 }
 
                 break;
+            /**
+             * Backward button click event
+             * Backward song to specified seconds
+             * */
             case R.id.btnBackward:
 
                 int currentPosition1 = mp.getCurrentPosition();
@@ -352,6 +150,10 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
                 }
 
                 break;
+            /**
+             * Next button click event
+             * Plays next song by taking currentSongIndex + 1
+             * */
             case R.id.btnNext:
 
                 if (currentSongIndex < (songsList.size() - 1)) {
@@ -364,6 +166,10 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
                 }
 
                 break;
+            /**
+             * Back button click event
+             * Plays previous song by currentSongIndex - 1
+             * */
             case R.id.btnPrevious:
 
                 if (currentSongIndex > 0) {
@@ -376,6 +182,10 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
                 }
 
                 break;
+            /**
+             * Button Click event for Repeat button
+             * Enables repeat flag to true
+             * */
             case R.id.btnRepeat:
 
                 if (isRepeat) {
@@ -393,6 +203,10 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
                 }
 
                 break;
+            /**
+             * Button Click event for Shuffle button
+             * Enables shuffle flag to true
+             * */
             case R.id.btnShuffle:
 
                 if (isShuffle) {
@@ -410,23 +224,12 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
                 }
 
                 break;
+            /**
+             * Button Click event for play/pause button
+             *
+             * */
             case R.id.btnPlay:
-//                if (mp.isPlaying() && isFirst) {
-//                    mp.pause();
-//                    btnPlay.get().setImageResource(R.drawable.play961);
-//                } else if (mp.isPlaying() == false && isFirst) {
-//                    mp.start();
-//                    btnPlay.get().setImageResource(R.drawable.pause96);
-//                } else if (isFirst == false&&mp.isPlaying()) {
-//                    mp.pause();
-//                    btnPlay.get().setImageResource(R.drawable.play961);
-//                    //isFirst=true;
-//                } else {
-//                    //songTitleLabel.get().setText(songsList.get(currentSongIndex).get("songTitle"));
-//                    playSong(0);
-//                    btnPlay.get().setImageResource(R.drawable.pause96);
-//                    isFirst=true;
-//                }
+
                 if (isFirst) {
                     if (mp.isPlaying() && isFirst) {
                         mp.pause();
@@ -439,8 +242,7 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
                     if (!mp.isPlaying()) {
                         playSong(0);
                         isFirst = true;
-                    }
-                    else {
+                    } else {
                         mp.pause();
                         btnPlay.get().setImageResource(R.drawable.play961);
                         isFirst = true;
@@ -477,11 +279,6 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
 
             // Updating progress bar
             updateProgressBar();
-           //isFirst=true;
-//             Intent intentSer = new Intent();
-//            intentSer.putExtra("isFirst",isFirst);
-//            sendBroadcast(intentSer);
-
 
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
@@ -496,7 +293,7 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
      * Update timer on seekbar
      */
     public static void updateProgressBar() {
-        mHandler.postDelayed(mUpdateTimeTask, 1000);
+        mHandler.postDelayed(mUpdateTimeTask, 100);
     }
 
     /**
@@ -518,7 +315,7 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
             songProgressBar.get().setProgress(progress);
 
             // Running this thread after 100 milliseconds
-            mHandler.postDelayed(this, 1000);
+            mHandler.postDelayed(this, 100);
         }
     };
 
