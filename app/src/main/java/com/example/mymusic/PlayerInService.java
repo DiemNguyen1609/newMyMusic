@@ -251,20 +251,29 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
     @SuppressWarnings("deprecation")
     @Override
     public int onStartCommand(Intent intent, int flags, int starId) {
-        super.onStart(intent, starId);
+        //super.onStart(intent, starId);
+        super.onStartCommand(intent, flags, starId);
         initUI();
         Log.d(TAG, "Service onStartCommand: " + this.hashCode());
         initUI();
         songsList = (ArrayList<HashMap<String, String>>) intent.getSerializableExtra("musiclist");
         isFirst = intent.getBooleanExtra("isFirst", false);
-        if (isFirst == true) {
+
+        if (isFirst==true){
             currentSongIndex = intent.getIntExtra("songIndex", 0);
             playSong(currentSongIndex);
         }
-        if (mp.isPlaying() && isFirst == false) {
-            btnPlay.get().setImageResource(R.drawable.pause96);
-            songTitleLabel.get().setText(songsList.get(currentSongIndex).get("songTitle"));
-        }
+             if(mp.isPlaying()&&isFirst==false) {
+                btnPlay.get().setImageResource(R.drawable.pause96);
+                songTitleLabel.get().setText(songsList.get(currentSongIndex).get("songTitle"));
+            }
+
+               else if(!mp.isPlaying()&&isFirst==false) {
+                 btnPlay.get().setImageResource(R.drawable.play961);
+             }
+
+
+
 
         Log.d(TAG, "Service title: " + songsList.get(currentSongIndex).get("songTitle"));
 //        NotificationManager notificationManager = (NotificationManager) getSystemService(
@@ -468,7 +477,7 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
 
             // Updating progress bar
             updateProgressBar();
-//            isFirst=true;
+           //isFirst=true;
 //             Intent intentSer = new Intent();
 //            intentSer.putExtra("isFirst",isFirst);
 //            sendBroadcast(intentSer);
@@ -487,7 +496,7 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
      * Update timer on seekbar
      */
     public static void updateProgressBar() {
-        mHandler.postDelayed(mUpdateTimeTask, 100);
+        mHandler.postDelayed(mUpdateTimeTask, 1000);
     }
 
     /**
@@ -509,7 +518,7 @@ public class PlayerInService extends Service implements OnClickListener, MediaPl
             songProgressBar.get().setProgress(progress);
 
             // Running this thread after 100 milliseconds
-            mHandler.postDelayed(this, 100);
+            mHandler.postDelayed(this, 1000);
         }
     };
 
